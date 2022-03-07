@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from "react";
 import { useLocation, useParams } from "react-router";
 import styled from "styled-components";
@@ -48,6 +49,18 @@ function Coin() {
       {loading ? <Loader>Loading...</Loader> : null}
     </Container>
   );
+=======
+import { useParams } from "react-router";
+
+interface Params {
+  coinId: string;
+}
+
+function Coin() {
+  const {coinId} = useParams();
+  
+  return <h1>Coin: {coinId}</h1>;
+>>>>>>> 74f2e1e52860765014c44a7806ba8ad442962513
 }
 
 export default Coin;

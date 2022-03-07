@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import styled from "styled-components";
 
@@ -41,6 +40,19 @@ function Coin() {
   const [loading, setLoading] = useState(true);
   const {coinId} =  useParams<string>();
   const {state} = useLocation() as ILocation;
+  const [info, setInfo] = useState({});
+  const [priceInfo, setPriceInfo] = useState({});
+  useEffect(() => {
+    (async ()=> {
+      const infoData = await(
+        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
+        ).json();
+        const priceData = await(
+          await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
+        ).json();
+        
+    })();
+  }, [])
   return (
     <Container>
       <Header>
@@ -49,18 +61,6 @@ function Coin() {
       {loading ? <Loader>Loading...</Loader> : null}
     </Container>
   );
-=======
-import { useParams } from "react-router";
-
-interface Params {
-  coinId: string;
-}
-
-function Coin() {
-  const {coinId} = useParams();
-  
-  return <h1>Coin: {coinId}</h1>;
->>>>>>> 74f2e1e52860765014c44a7806ba8ad442962513
 }
 
 export default Coin;

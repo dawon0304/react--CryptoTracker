@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import {Outlet,useLocation, useParams,Link,useMatch } from "react-router-dom";
 import styled from "styled-components";
 
 
@@ -24,6 +24,53 @@ const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const OverView = styled.div`
+  display: flex;
+  justify-content:space-between;
+  background-color:rgba(0,0,0,0.5);
+  padding: 10px 20px;
+  border-radius: 10px;
+`;
+
+const OverViewItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  span:first-child {
+    font-size: 10px;
+    font-weight: 400;
+    text-align: uppercase;
+    margin-bottom: 5px;
+  }
+`;
+
+
+const Description = styled.p`
+  margin: 20px 0px;
+`;
+
+const Tabs = styled.div`
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  margin: 25px 0px;
+  gap:10px;
+`;
+
+const Tab = styled.span<{isActive: boolean}>`
+  text-align:center;
+  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 800;
+  background-color: rgba(0,0,0,0.5);
+  padding: 7px 10px;
+  border-radius: 10px;
+  color: ${props => props.isActive ? props.theme.accentColor : props.theme.textColor };
+  a{
+    display: block;
+  }
 `;
 
 interface RouteParams {
@@ -99,6 +146,9 @@ function Coin() {
   const {state} = useLocation() as ILocation;
   const [info, setInfo] = useState<InfoData>();
   const [priceInfo, setPriceInfo] = useState<PriceData>();
+  const priceMatch = useMatch("/:coinId/price");
+  const chartMatch = useMatch("/:coinId/chart");
+  
   useEffect(() => {
     (async ()=> {
       const infoData = await(
@@ -107,17 +157,59 @@ function Coin() {
         const priceData = await(
           await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
         ).json();
-        setInfo(infoData)
-        setPriceInfo(priceData)
+        setInfo(infoData);
+        setPriceInfo(priceData);
+        setLoading(false);
         
     })();
-  }, [])
+  }, []);
   return (
     <Container>
       <Header>
-        <Title>{state?.name || "Loading,,,"}</Title>
+        <Title>
+          {state?.name ? state.name : loading ? "Loading..." : info?.name}
+        </Title>
       </Header>
-      {loading ? <Loader>Loading...</Loader> : }
+      {loading ? (
+        <Loader>Loading...</Loader>
+        ) : (
+          <>
+            <OverView>
+              <OverViewItem>
+                <span>Rank:</span>
+                <span>{info?.rank}</span>
+              </OverViewItem>
+              <OverViewItem>
+                <span>Symbol:</span>
+                <span>{info?.symbol}</span>
+              </OverViewItem>
+              <OverViewItem>
+                <span>Open Source:</span>
+                <span>{info?.open_source ? "Yes":"No"}</span>
+              </OverViewItem>
+            </OverView>
+            <Description>{info?.description}</Description>
+            <OverView>
+              <OverViewItem>
+                <span>Total Suply:</span>
+                <span>{priceInfo?.total_supply}</span>
+              </OverViewItem>
+              <OverViewItem>
+                <span>Max.Suply:</span>
+                <span>{priceInfo?.max_supply}</span>
+              </OverViewItem>
+            </OverView>
+            <Tabs>
+              <Tab isActive={chartMatch !== null}>
+                <Link to={`/${coinId}/chart`}>Chart</Link>
+              </Tab>
+              <Tab isActive={priceMatch !== null}>
+                <Link to={`/${coinId}/price`}>Price</Link>
+              </Tab>
+          </Tabs>
+            <Outlet/>
+          </>
+        ) }
     </Container>
   );
 }

@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
+import { useQuery } from "react-query";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { fetchCoins } from "./api";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -15,9 +17,7 @@ const Header = styled.header`
   align-items: center;
 `;
 
-const CoinList = styled.ul`
-
-`;
+const CoinsList = styled.ul``;
 
 const Coin = styled.li`
   background-color: white;
@@ -55,46 +55,40 @@ const Img = styled.img`
 `;
 
 
-interface CoinInterface {
+interface ICoin {
   id: string,
   name: string,
   symbol: string,
   rank: number,
   is_new: boolean,
-  is_active: boolean,
+  is_active: boolean, 
   type: string,
 }
 
 function Coins() {
-  const [coins, setCoins] = useState<CoinInterface[]>([]);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    (async() => {
-      const response = await fetch("https://api.coinpaprika.com/v1/coins");
-      const json = await response.json();
-      setCoins(json.slice(0,100));
-      setLoading(false);
-    })();
-  }, []);
+  const { isLoading, data} = useQuery<ICoin[]>("allCoins", fetchCoins);
   return (
     <Container>
       <Header>
         <Title>코인</Title>
       </Header>
-      {loading ? (
-      <Loader>"Loading..."</Loader>
+      {isLoading ? (
+      <Loader>Loading...</Loader>
       ) : ( 
-      <CoinList>
-        {coins.map((coin) => (
-          <Coin key = {coin.id}>
-            <Link to = {`/${coin.id}`}
-                  state={{name:coin.name}}>
-                <Img src={`https://cryptoicon-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
-                  {coin.name} &rarr;
-            </Link>
-          </Coin>
-        ))}
-      </CoinList>)}
+        <CoinsList>
+          {data?.slice(0,100).map((coin) => (
+            <Coin key={coin.id}>
+              <Link to={ `/${coin.id}`}
+                  state={{name: coin.name}}>
+                <Img
+                  src={`https://cryptoicon-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`}
+                />
+                {coin.name} &rarr;
+              </Link>
+            </Coin>
+          ))}
+        </CoinsList>
+      )}
     </Container>
   );
 }
